@@ -9,24 +9,28 @@ class HashMap
   def initialize
     @capacity = 16
     @load_factor = 0.75
-    @hashmap = [LinkedList.new] * @capacity
+    @hashmap = []
+    @capacity.times do
+      @hashmap.append(LinkedList.new)
+    end
     @length = 0
   end
 
   def set(key, value)
     double if @capacity * @load_factor <= length
 
-    index = hash(key) % capacity
+    index = hash(key)
     node = @hashmap[index].find(key)
     if node.nil?
       @hashmap[index].append(key, value)
+      @length += 1
     else
       node.val = value
     end
   end
 
   def get(key)
-    index = hash(key) % capacity
+    index = hash(key)
     node = @hashmap[index].find(key)
     return if node.nil?
 
@@ -34,25 +38,30 @@ class HashMap
   end
 
   def has?(key)
-    index = hash(key) % capacity
+    index = hash(key)
     @hashmap[index].contains?(key)
   end
 
   def remove(key)
-    index = hash(key) % capacity
-    @hashmap[index].remove(key)
+    index = hash(key)
+    removed = @hashmap[index].remove(key)
+    @length -= 1 unless removed.nil?
+    removed
   end
 
   def clear
     @length = 0
     @capacity = 16
-    @hashmap = [LinkedList.new] * @capacity
+    @hashmap = []
+    @capacity.times do
+      @hashmap.append(LinkedList.new)
+    end
   end
 
   def keys
     keys_array = []
     @hashmap.each do |node|
-      current = node
+      current = node.head
       until current.nil?
         keys_array.append(current.key)
         current = current.next
@@ -64,7 +73,7 @@ class HashMap
   def values
     values_array = []
     @hashmap.each do |node|
-      current = node
+      current = node.head
       until current.nil?
         values_array.append(current.val)
         current = current.next
@@ -76,7 +85,7 @@ class HashMap
   def entries
     array = []
     @hashmap.each do |node|
-      current = node
+      current = node.head
       until current.nil?
         array.append([current.key, current.val])
         current = current.next
@@ -89,12 +98,15 @@ class HashMap
 
   def double
     @capacity *= 2
-    temp_array = [LinkedList.new] * @capacity
+    temp_array = []
+    @capacity.times do
+      temp_array.append(LinkedList.new)
+    end
     @hashmap.each do |node|
-      current = node
+      current = node.head
       until current.nil?
         index = hash(current.key)
-        temp_array[index].append(current.key, current.value)
+        temp_array[index].append(current.key, current.val)
         current = current.next
       end
     end
@@ -107,6 +119,6 @@ class HashMap
 
     key.each_char { |char| hash_code = prime_number * hash_code + char.ord }
 
-    hash_code
+    hash_code % @capacity
   end
 end

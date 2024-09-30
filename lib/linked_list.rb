@@ -101,7 +101,7 @@ class LinkedList
     current = @head
     array = []
     until current.nil?
-      array << "( #{current.val} ) -> "
+      array << "( #{current.key}: #{current.val} ) -> "
       current = current.next
     end
     array << 'nil'
